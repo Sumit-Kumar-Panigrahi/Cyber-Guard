@@ -1,29 +1,41 @@
+import re
 from typing import Dict, Any, List
+from app.services.ai_assistant import ai_assistant_engine
+from app.services.sensitive_data_detector import sensitive_data_detector
 
 class CallAnalyzer:
+    """
+    Intelligent Call Guard transcript analyzer for voice phishing (vishing),
+    authority impersonation, and high-pressure credential extraction.
+    """
+
     def __init__(self):
         self.otp_lure_keywords = [
             "otp", "one time password", "verification code", "6 digit", "code aaya hoga",
-            "bataiye", "share karein", "sms me aaya code", "cvv", "pin number"
+            "bataiye", "share karein", "sms me aaya code", "cvv", "pin number", "secret code"
         ]
         self.impersonation_keywords = [
-            "bank manager", "sbi head office", "card department", "reserve bank", "rbi",
-            "cbi officer", "police cyber cell", "customs department", "trai officer"
+            "customer support", "support executive", "bank manager", "head office",
+            "card department", "reserve bank", "rbi", "cbi officer", "police cyber cell",
+            "customs department", "trai officer", "electricity officer", "discom", "helpdesk"
         ]
         self.coercion_keywords = [
             "arrest", "fir", "jail", "penalty", "account blocked permanently",
-            "police karwai", "immediately", "disconnect mat karna", "line par rahiye"
+            "police karwai", "immediately", "disconnect mat karna", "line par rahiye",
+            "in 2 hours", "turant"
         ]
 
     def analyze_transcript(self, transcript: str) -> Dict[str, Any]:
-        transcript_lower = transcript.lower()
+        scan_res = sensitive_data_detector.scan_and_redact(transcript)
+        sanitized = scan_res["sanitized_text"]
+        transcript_lower = sanitized.lower()
 
         indicators: List[str] = []
         matched_otp = [k for k in self.otp_lure_keywords if k in transcript_lower]
         matched_impersonation = [k for k in self.impersonation_keywords if k in transcript_lower]
         matched_coercion = [k for k in self.coercion_keywords if k in transcript_lower]
 
-        risk_score = 0
+        risk_score = 15
 
         if matched_otp:
             indicators.append("HIGH_PRIORITY_OTP_OR_CREDENTIAL_SOLICITATION")
@@ -38,25 +50,27 @@ class CallAnalyzer:
             risk_score += 25
 
         final_risk = min(risk_score, 100)
-        confidence = 0.96 if final_risk >= 70 else 0.82
+        confidence = 0.96 if final_risk >= 70 else (0.85 if final_risk >= 40 else 0.70)
 
+        # Dynamic explanations
         if final_risk >= 70:
             category = "VOICE_PHISHING_VISHING_CALL"
             verdict = "CRITICAL_THREAT"
+            imp_desc = f" ({', '.join(matched_impersonation)})" if matched_impersonation else ""
             explanation_en = (
-                "Critical Vishing Alert: Caller is exerting high psychological pressure, impersonating an official, "
-                "and aggressively soliciting your one-time password (OTP). Official bank staff NEVER request OTPs."
+                f"Critical Vishing Alert: Caller is exerting intense psychological urgency, impersonating an official{imp_desc}, "
+                "and demanding sensitive verification codes or OTPs. Official representatives never ask for OTPs or PINs over the phone."
             )
             explanation_hi = (
-                "अति-संवेदनशील कॉल चेतावनी (Vishing): कॉलर खुद को बैंक या पुलिस अधिकारी बताकर तुरंत OTP मांग रहा है। "
-                "याद रखें, बैंक कभी भी फोन पर OTP या पासवर्ड नहीं मांगता। तुरंत कॉल काटें।"
+                f"अति-संवेदनशील कॉल चेतावनी (Vishing): कॉलर किसी अधिकृत संस्था{imp_desc} का प्रतिनिधि बनकर दबाव बना रहा है "
+                "और फोन पर आपका गुप्त कोड या ओटीपी मांग रहा है। याद रखें, कोई भी वैध संस्था फोन पर ओटीपी नहीं मांगती। तुरंत कॉल काटें।"
             )
             recommended_action = "Disconnect call immediately. Never share OTP or screen access. Block phone number."
         elif final_risk >= 35:
             category = "SUSPICIOUS_UNVERIFIED_CALL"
             verdict = "SUSPICIOUS"
-            explanation_en = "Transcript displays unusual urgency or inquiry into account details. Exercise high caution."
-            explanation_hi = "संदिग्ध कॉल: बातचीत में खाते से जुड़ी संवेदनशील पूछताछ के संकेत मिले हैं। सतर्क रहें।"
+            explanation_en = "Transcript displays unusual urgency or inquiry into personal credentials. Exercise high caution."
+            explanation_hi = "संदिग्ध कॉल: बातचीत में असामान्य जल्दबाजी या व्यक्तिगत जानकारी पूछने के संकेत मिले हैं। सतर्क रहें।"
             recommended_action = "Do not share personal identifiers or bank details."
         else:
             category = "STANDARD_CALL_TRANSCRIPT"
@@ -76,13 +90,14 @@ class CallAnalyzer:
                 "matched_otp_triggers": matched_otp,
                 "matched_impersonation": matched_impersonation,
                 "matched_coercion": matched_coercion,
+                "has_sensitive_data_redacted": scan_res["has_sensitive_data"],
                 "raw_audio_stored": False,
-                "transcript_analyzed_tokens": len(transcript.split())
+                "transcript_analyzed_tokens": len(sanitized.split())
             },
             "mitre": {
-                "technique_id": "T1598",
-                "technique_name": "Phishing for Information: Voice / Telephone",
-                "tactic": "Reconnaissance / Initial Access"
+                "technique_id": "T1566.004",
+                "technique_name": "Spearphishing Voice (Vishing)",
+                "tactic": "Initial Access"
             } if final_risk >= 50 else None,
             "explanation_en": explanation_en,
             "explanation_hi": explanation_hi,

@@ -395,7 +395,7 @@ export const ActivityLog: React.FC = () => {
               }`}
             >
               <AlertTriangle className="h-3.5 w-3.5" />
-              <span>{isTamperSimulated ? 'Disable Tamper Demo' : 'Simulate Block Tamper (Demo)'}</span>
+              <span>{isTamperSimulated ? 'Reset Integrity Test' : 'Test Cryptographic Tamper Alert'}</span>
             </button>
           </div>
         </div>

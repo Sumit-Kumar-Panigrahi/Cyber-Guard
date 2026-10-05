@@ -1,7 +1,8 @@
-import React from 'react';
-import { Shield, ShieldAlert, LogOut, CheckCircle, PhoneCall } from 'lucide-react';
+import React, { useState } from 'react';
+import { Shield, ShieldAlert, LogOut, CheckCircle, PhoneCall, Sparkles } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { SecurityAssistantModal } from '../assistant/SecurityAssistantModal';
 
 interface NavbarProps {
   currentMode: 'user' | 'admin';
@@ -11,6 +12,7 @@ interface NavbarProps {
 export const Navbar: React.FC<NavbarProps> = ({ currentMode, setMode }) => {
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const [isAssistantOpen, setIsAssistantOpen] = useState(false);
 
 
   const handleLogout = () => {
@@ -67,6 +69,15 @@ export const Navbar: React.FC<NavbarProps> = ({ currentMode, setMode }) => {
                 <span>SOC Command</span>
               </button>
             </div>
+
+            <button
+              onClick={() => setIsAssistantOpen(true)}
+              className="flex items-center gap-1.5 rounded-xl border border-cyan-500/50 bg-cyan-950/70 px-3 py-1.5 text-xs font-bold text-cyan-300 hover:bg-cyan-900/80 transition shadow-sm"
+              title="CYBERGUARD AI Security Assistant"
+            >
+              <Sparkles className="h-3.5 w-3.5 text-cyan-400 animate-pulse" />
+              <span>AI Assistant</span>
+            </button>
 
             <button
               onClick={() => navigate('/emergency')}
@@ -128,6 +139,11 @@ export const Navbar: React.FC<NavbarProps> = ({ currentMode, setMode }) => {
           )}
         </div>
       </div>
+
+      <SecurityAssistantModal
+        isOpen={isAssistantOpen}
+        onClose={() => setIsAssistantOpen(false)}
+      />
     </header>
   );
 };

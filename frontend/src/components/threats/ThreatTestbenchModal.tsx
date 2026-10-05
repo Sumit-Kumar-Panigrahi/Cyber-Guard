@@ -25,28 +25,28 @@ interface ThreatTestbenchModalProps {
 const PRESETS = [
   {
     type: 'message' as const,
-    label: 'SBI YONO KYC Block (Hinglish/Urgent)',
-    content: 'Dear customer your SBI account will be blocked today update your KYC immediately at sbi-kyc-update.online',
+    label: 'Banking Suspension Alert (Urgent Lure)',
+    content: 'Dear customer, your bank account will be suspended today. Update your KYC verification immediately at https://security-banking-portal.online/login',
   },
   {
     type: 'message' as const,
-    label: 'Bijli Vibhag Disconnection (Hindi)',
+    label: 'Utility Disconnection Notice (Hindi)',
     content: 'Priye grahak aapka bijli connection aaj raat 9:30 baje kat diya jayega kyunki pichla bill jama nahi hai. Turant sampark karein: 9876543210',
   },
   {
     type: 'url' as const,
-    label: 'Fake SBI Lookalike Domain',
-    content: 'http://sbi-kyc-update.online/netbanking/login',
+    label: 'Deceptive Cloned Portal Link',
+    content: 'http://auth-secure-update.online/netbanking/login',
   },
   {
     type: 'call' as const,
-    label: 'Scam Call Demanding OTP',
-    content: 'Namaste sir, bank manager bol raha hoon SBI Mumbai branch se. Aapka account block ho gaya hai, turant 6 digit OTP bataiye nahi toh police FIR hogi.',
+    label: 'Coercive Vishing Call (Code Extraction)',
+    content: 'Namaste sir, customer support officer calling. Your account access has been flagged for suspension. Share your 6-digit verification code immediately or legal action will proceed.',
   },
   {
     type: 'message' as const,
-    label: 'Legitimate Bank Alert (Safe)',
-    content: 'Your SBI account has been credited with Rs 5000 via UPI from Rahul Sharma on 04-10-2026. Available balance Rs 24,190.',
+    label: 'Legitimate Transaction Alert (Safe)',
+    content: 'Your bank account has been credited with Rs 5000 via UPI transfer from Rahul Sharma on 04-10-2026. Available balance Rs 24,190.',
   },
 ];
 
@@ -58,7 +58,7 @@ export const ThreatTestbenchModal: React.FC<ThreatTestbenchModalProps> = ({
 }) => {
   const [tab, setTab] = useState<'message' | 'url' | 'call' | 'social'>(initialTab);
   const [inputVal, setInputVal] = useState(PRESETS[0].content);
-  const [urlLinkVal, setUrlLinkVal] = useState('http://sbi-kyc-update.online');
+  const [urlLinkVal, setUrlLinkVal] = useState('http://auth-secure-update.online');
   const [platformVal, setPlatformVal] = useState('WhatsApp');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
@@ -130,10 +130,10 @@ export const ThreatTestbenchModal: React.FC<ThreatTestbenchModalProps> = ({
           </button>
         </div>
 
-        {/* 1-Click Demo Presets Bar */}
+        {/* Threat Vector Presets */}
         <div className="mt-4">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2">
-            Quick 1-Click Indian Threat Presets:
+            Simulated Threat Vectors:
           </p>
           <div className="flex flex-wrap gap-2">
             {PRESETS.map((p, idx) => (

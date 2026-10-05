@@ -22,13 +22,22 @@ from app.schemas.attack_chain import (
 
 router = APIRouter(prefix="/chains", tags=["Attack Chain & Markov Prediction Engine"])
 
+def resolve_user_id(current_user: Optional[User], db: Session) -> str:
+    if current_user:
+        return current_user.id
+    u = db.query(User).first()
+    if u:
+        return u.id
+    from app.routers.audit import resolve_user
+    return resolve_user(None, db).id
+
 @router.get("", response_model=List[AttackChainOut])
 def get_user_attack_chains(
     current_user: Optional[User] = Depends(get_optional_current_user),
     db: Session = Depends(get_db)
 ):
     """Retrieve all attack chains associated with current authenticated user."""
-    user_id = current_user.id if current_user else "demo-user"
+    user_id = resolve_user_id(current_user, db)
     chains = db.query(AttackChain).filter(AttackChain.user_id == user_id).all()
     out = []
     for c in chains:
@@ -78,7 +87,7 @@ def get_active_attack_chain(
     db: Session = Depends(get_db)
 ):
     """Retrieve current active attack chain and correlated DAG for authenticated user."""
-    user_id = current_user.id if current_user else "demo-user"
+    user_id = resolve_user_id(current_user, db)
     c = db.query(AttackChain).filter(
         AttackChain.user_id == user_id,
         AttackChain.status == "ACTIVE"
@@ -136,7 +145,7 @@ def get_attack_chain_detail(
     db: Session = Depends(get_db)
 ):
     """Retrieve full NetworkX DAG nodes, edges, predictions, and explanations for a specific chain."""
-    user_id = current_user.id if current_user else "demo-user"
+    user_id = resolve_user_id(current_user, db)
     c = db.query(AttackChain).filter(AttackChain.id == chain_id, AttackChain.user_id == user_id).first()
     if not c:
         raise HTTPException(status_code=404, detail="Attack chain not found")
@@ -188,7 +197,7 @@ def correlate_live_events(
     Executes NetworkX graph correlation and Markov prediction over the user's
     recent security events, binding them into an active Attack Chain in SQLite.
     """
-    user_id = current_user.id if current_user else "demo-user"
+    user_id = resolve_user_id(current_user, db)
     events = (
         db.query(SecurityEvent)
         .filter(SecurityEvent.user_id == user_id)
@@ -205,9 +214,9 @@ def correlate_live_events(
             severity="LOW",
             human_risk_score=15,
             tech_risk_score=10,
-            current_stage="Initial Recon & Phishing Lure",
-            predicted_next_stage="Malicious URL & Typosquatting Access",
-            prediction_confidence=0.74,
+            current_stage="Monitoring Active",
+            predicted_next_stage="There is not enough evidence to confidently predict the next stage.",
+            prediction_confidence=0.0,
             explanation_en="No active intrusions in progress. Telemetry channels monitored under zero-trust privacy consent.",
             explanation_hi="कोई सक्रिय हमला नहीं है। गोपनीयता नियमों के तहत टेलीमेट्री की निगरानी जारी है।"
         )
@@ -350,8 +359,8 @@ def contain_attack_chain(
     """
     if not current_user:
         user = db.query(User).first()
-        user_id = user.id if user else "demo-user"
-        user_name = user.full_name if user else "Sumit Kumar Panigrahi"
+        user_id = user.id if user else "user-session"
+        user_name = user.full_name if user else "Security Analyst"
     else:
         user_id = current_user.id
         user_name = current_user.full_name
@@ -379,9 +388,9 @@ def contain_attack_chain(
         db.refresh(c)
 
     actions = [
-        "Revoked NetBanking session token (sess_8172910a)",
-        "Blacklisted rogue Jamtara IP 103.224.182.12 across perimeter firewall",
-        "Pushed DNS sinkhole for 'sbi-kyc-update.online' to zero-trust resolver",
+        "Revoked active account session tokens and authorized access cookies",
+        "Blacklisted hostile IP origin across perimeter firewall",
+        "Pushed DNS sinkhole for flagged domains to zero-trust resolver",
         "Dispatched SMS alert to user confirmed mobile: 'Security containment active. No unauthorized transactions permitted.'"
     ]
 
@@ -400,7 +409,7 @@ def contain_attack_chain(
         user_id=user_id,
         status="CONTAINED",
         recommended_action="REVOKE_SESSION",
-        action_target="103.224.182.12 & sbi-kyc-update.online",
+        action_target="Hostile Session & Malicious Infrastructure",
         action_approved_by=user_name,
         action_executed_at=now,
         resolution_notes="Immediate 1-click containment executed by user via Cyberguard Shield."

@@ -24,6 +24,7 @@ import { useConsent } from '../../context/ConsentContext';
 import { ThreatTestbenchModal } from '../../components/threats/ThreatTestbenchModal';
 import { MobilePhoneFrame } from '../../components/simulation/MobilePhoneFrame';
 import { WhatsAppShareModal } from '../../components/simulation/WhatsAppShareModal';
+import { SecurityAssistantModal } from '../../components/assistant/SecurityAssistantModal';
 import { analysisService, type SecurityEventItem, type AnalysisResult } from '../../services/analysisService';
 import { attackChainService } from '../../services/attackChainService';
 import type { AttackChainDetail } from '../../types/attackChain';
@@ -40,6 +41,7 @@ export const ProtectionCenter: React.FC = () => {
   const [isTestbenchOpen, setIsTestbenchOpen] = useState(false);
   const [testbenchTab, setTestbenchTab] = useState<'message' | 'url' | 'call' | 'social'>('message');
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isAssistantOpen, setIsAssistantOpen] = useState(false);
 
   // Live Dynamic Data states
   const [recentEvents, setRecentEvents] = useState<SecurityEventItem[]>([]);
@@ -162,6 +164,13 @@ export const ProtectionCenter: React.FC = () => {
 
           <div className="flex flex-wrap items-center gap-3">
             <button
+              onClick={() => setIsAssistantOpen(true)}
+              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-cyan-600/25 hover:from-cyan-500 hover:to-blue-500 transition animate-pulse"
+            >
+              <Sparkles className="h-3.5 w-3.5" />
+              <span>AI Security Assistant</span>
+            </button>
+            <button
               onClick={() => setIsShareModalOpen(true)}
               className="flex items-center gap-2 rounded-xl border border-cyan-800/80 bg-cyan-950/60 px-4 py-2.5 text-xs font-semibold text-cyan-300 hover:bg-cyan-900/60 transition shadow-sm"
             >
@@ -180,9 +189,9 @@ export const ProtectionCenter: React.FC = () => {
             </button>
             <button
               onClick={() => navigate('/attack-chain')}
-              className="flex items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-600 to-blue-600 px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-cyan-600/20 hover:from-cyan-500 hover:to-blue-500 transition"
+              className="flex items-center gap-2 rounded-xl border border-slate-700 bg-slate-800/80 px-4 py-2.5 text-xs font-semibold text-slate-200 hover:bg-slate-700 transition"
             >
-              <GitBranch className="h-3.5 w-3.5" />
+              <GitBranch className="h-3.5 w-3.5 text-cyan-400" />
               <span>Attack Chain Story</span>
             </button>
           </div>
@@ -360,7 +369,7 @@ export const ProtectionCenter: React.FC = () => {
                 onClick={() => navigate('/attack-chain')}
                 className="mt-3 text-xs font-semibold text-cyan-400 hover:text-cyan-300 flex items-center gap-1"
               >
-                <span>Open Attack Chain Demo</span>
+                <span>View Attack Chain Story</span>
                 <ArrowUpRight className="h-3 w-3" />
               </button>
             </div>
@@ -619,6 +628,15 @@ export const ProtectionCenter: React.FC = () => {
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
         onThreatDetected={handleThreatIngested}
+      />
+
+      <SecurityAssistantModal
+        isOpen={isAssistantOpen}
+        onClose={() => setIsAssistantOpen(false)}
+        onSecurityEventCreated={() => {
+          loadRecentEvents();
+          loadActiveChain();
+        }}
       />
     </div>
   );

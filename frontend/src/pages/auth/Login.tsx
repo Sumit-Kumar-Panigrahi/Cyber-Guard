@@ -115,7 +115,7 @@ export const Login: React.FC = () => {
             </button>
           </form>
 
-          {/* Quick Hackathon Demo Filler */}
+          {/* Quick Fast Sign-In Filler */}
           <div className="mt-5 pt-4 border-t border-slate-800/80">
             <button
               onClick={handleQuickDemoFill}
@@ -124,7 +124,7 @@ export const Login: React.FC = () => {
               className="flex w-full items-center justify-center gap-2 rounded-xl border border-cyan-800/60 bg-cyan-950/40 py-2 text-xs font-medium text-cyan-300 hover:bg-cyan-900/50 hover:text-cyan-200 transition"
             >
               <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
-              <span>One-Click Hackathon Demo Login (Sumit Kumar Panigrahi)</span>
+              <span>One-Click Fast Sign-In (Security Analyst)</span>
             </button>
           </div>
 

@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database import engine, Base
 import app.models  # Ensure all SQLAlchemy models are registered
-from app.routers import auth, consent, analysis, attack_chain, audit, metrics, admin, emergency
+from app.routers import auth, consent, analysis, attack_chain, audit, metrics, admin, emergency, assistant
 
 # Initialize tables
 Base.metadata.create_all(bind=engine)
@@ -28,10 +28,12 @@ app.include_router(auth.router, prefix=settings.API_V1_STR)
 app.include_router(consent.router, prefix=settings.API_V1_STR)
 app.include_router(analysis.router, prefix=settings.API_V1_STR)
 app.include_router(attack_chain.router, prefix=settings.API_V1_STR)
+app.include_router(assistant.router, prefix=settings.API_V1_STR)
 app.include_router(audit.router, prefix=settings.API_V1_STR)
 app.include_router(metrics.router, prefix=settings.API_V1_STR)
 app.include_router(admin.router, prefix=settings.API_V1_STR)
 app.include_router(emergency.router, prefix=settings.API_V1_STR)
+
 
 
 @app.get("/")

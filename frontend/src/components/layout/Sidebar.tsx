@@ -84,10 +84,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ mode }) => {
       <div className="mt-8 rounded-xl border border-slate-800/80 bg-gradient-to-b from-slate-900/90 to-slate-950 p-3.5">
         <div className="flex items-center gap-2 text-cyan-400 mb-1.5">
           <ShieldCheck className="h-4 w-4" />
-          <span className="text-xs font-semibold">India Threat Shield</span>
+          <span className="text-xs font-semibold">Active Threat Defense</span>
         </div>
         <p className="text-[11px] leading-relaxed text-slate-400">
-          Active filters for SBI/Paytm KYC fraud, UPI lure patterns, Digital Arrest scams, and Devanagari threats.
+          Continuous zero-trust detection for financial fraud, UPI lures, impersonation extortion, deceptive URLs, and multilingual threats.
         </p>
       </div>
     </aside>

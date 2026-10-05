@@ -2,7 +2,7 @@ from typing import Dict, Any, List
 
 class BilingualExplainer:
     """
-    Generates explainable, citizen-friendly and SOC-grade narratives in both
+    Generates explainable, citizen-friendly narratives in both
     English and Hindi for multi-stage correlated attack chains.
     """
 
@@ -20,7 +20,7 @@ class BilingualExplainer:
             return {
                 "en": (
                     "ATTACK CONTAINED: Cyberguard successfully neutralized the active attack chain. "
-                    "The rogue session has been revoked, malicious domains blocked at DNS, "
+                    "The unauthorized session has been revoked, malicious domains blocked at DNS, "
                     "and authorization credentials secured. Your financial accounts remain protected."
                 ),
                 "hi": (
@@ -35,38 +35,45 @@ class BilingualExplainer:
         # Build dynamic narrative based on stages and events
         num_events = len(events)
         sources = list(set(e.get("source", "Unknown") for e in events))
-        source_str = ", ".join(sources) if sources else "SMS and Web"
+        source_str = ", ".join(sources) if sources else "Messaging and Web"
+
+        if predicted_stage == "There is not enough evidence to confidently predict the next stage." or confidence == 0.0:
+            pred_en = "There is currently not enough telemetry to forecast a subsequent attack stage."
+            pred_hi = "वर्तमान में अगले हमले के चरण का अनुमान लगाने के लिए पर्याप्त संकेत नहीं हैं।"
+            speech_pred_en = "No immediate follow-up attack predicted. Standard caution advised."
+            speech_pred_hi = "तत्काल किसी नए हमले का संकेत नहीं है। सामान्य सतर्कता बरतें।"
+        else:
+            pred_en = f"Our predictive correlation engine forecasts with {int(confidence * 100)}% certainty that the adversary's next step is '{predicted_stage}'."
+            pred_hi = f"हमारे पूर्वानुमान मॉडल के अनुसार {int(confidence * 100)}% संभावना है कि जालसाज का अगला कदम '{predicted_stage}' होगा।"
+            speech_pred_en = f"The adversary may attempt {predicted_stage}. Do not share verification codes."
+            speech_pred_hi = f"धोखेबाज अगला कदम उठा सकता है। कोई भी ओटीपी या कोड किसी से साझा न करें।"
 
         en_narrative = (
             f"CYBERGUARD CORRELATION ALERT: We have correlated {num_events} threat signal(s) across {source_str} "
-            f"into a single coordinated cyber intrusion. The attacker has completed the '{current_stage}' stage. "
-            f"Our Markov Chain prediction engine forecasts with {int(confidence * 100)}% certainty that the attacker's "
-            f"immediate next objective is '{predicted_stage}'. "
-            f"Human Susceptibility Risk is rated at {human_risk}/100 and Technical Intrusion Risk at {tech_risk}/100. "
-            f"DO NOT share any 6-digit OTP received on your phone, and do not authorize any pending login requests."
+            f"into a coordinated intrusion progression. Current stage: '{current_stage}'. "
+            f"{pred_en} "
+            f"Human Susceptibility Risk is rated at {human_risk}/100 and Technical Risk at {tech_risk}/100. "
+            f"Never share verification codes (OTP) received on your phone, and do not click unverified links."
         )
 
         hi_narrative = (
-            f"साइबरगार्ड चेतावनी: हमने {source_str} के माध्यम से मिले {num_events} संदिग्ध संकेतों को एक बड़े साइबर हमले से जोड़ा है। "
-            f"जालसाज वर्तमान में '{current_stage}' चरण पूरा कर चुका है। "
-            f"हमारे एआई प्रेडिक्शन मॉडल के अनुसार {int(confidence * 100)}% संभावना है कि धोखेबाज का अगला कदम '{predicted_stage}' होगा। "
+            f"साइबरगार्ड चेतावनी: हमने {source_str} के माध्यम से मिले {num_events} संदिग्ध संकेतों को एक साइबर हमले से जोड़ा है। "
+            f"वर्तमान चरण: '{current_stage}'। "
+            f"{pred_hi} "
             f"मानवीय जोखिम स्कोर {human_risk}/100 और तकनीकी खतरा {tech_risk}/100 है। "
-            f"कृपया ध्यान दें: अपने फोन पर आया कोई भी ओटीपी किसी को न बताएं और न ही किसी अज्ञात लिंक पर क्लिक करें।"
+            f"कृपया ध्यान दें: फोन पर आया कोई भी ओटीपी किसी को न बताएं और न ही किसी अज्ञात लिंक पर क्लिक करें।"
         )
 
-        # Voice Speech script designed for clear TTS audio warning
         speech_en = (
             f"Warning! Cyberguard has detected a coordinated cyber attack against your account. "
-            f"The attacker has accessed your login credentials and is now attempting: {predicted_stage}. "
-            f"Do not share any OTP with any caller, even if they claim to be from SBI or police. "
-            f"Press contain now to revoke the attacker session."
+            f"{speech_pred_en} "
+            f"Never share any OTP or verification code with any caller."
         )
 
         speech_hi = (
-            f"सावधान! साइबरगार्ड ने आपके खाते पर साइबर हमले की पहचान की है। "
-            f"धोखेबाज अब आपसे ओटीपी मांगने या पैसे निकालने का प्रयास कर रहा है। "
-            f"बैंक या पुलिस के नाम पर आए किसी भी फोन कॉल पर ओटीपी बिल्कुल न दें। "
-            f"हमले को तुरंत रोकने के लिए कंटेन बटन दबाएं।"
+            f"सावधान! साइबरगार्ड ने आपके खाते पर संदिग्ध साइबर गतिविधि की पहचान की है। "
+            f"{speech_pred_hi} "
+            f"फोन पर आया कोई भी ओटीपी किसी को भी न बताएं।"
         )
 
         return {

@@ -371,10 +371,10 @@ def get_user_incidents(
             user_id=user.id,
             status="CONTAINED",
             recommended_action="BLOCK_DOMAIN",
-            action_target="sbi-kyc-update.online",
+            action_target="malicious-credential-stealer.online",
             action_approved_by=user.full_name,
             action_executed_at=datetime.utcnow(),
-            resolution_notes="Malicious phishing domain blocked across zero-trust DNS resolvers and reported to CERT-In."
+            resolution_notes="Malicious phishing domain blocked across zero-trust DNS resolvers and reported to national cyber defense."
         )
         db.add(seed_inc)
         db.commit()

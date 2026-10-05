@@ -7,7 +7,7 @@ from app.models.user import User
 from app.models.event import SecurityEvent
 from app.models.audit import DeviceAuditLog
 from app.models.attack_chain import AttackChain
-from app.services.auth_service import get_current_user
+from app.services.auth_service import get_current_user, get_optional_current_user
 from app.services.nlp_detector import nlp_detector
 from app.services.url_detector import url_detector
 from app.services.call_analyzer import call_analyzer
@@ -28,12 +28,12 @@ router = APIRouter(prefix="/analyze", tags=["Specialized Detection Engines"])
 
 def save_security_event_if_threat(
     db: Session,
-    user_id: str,
+    user_id: Optional[str],
     result: dict,
     is_simulated: bool = False
 ) -> Optional[str]:
-    # Persist security indicator if risk is elevated
-    if result.get("risk_score", 0) >= 30:
+    # Persist security indicator if risk is elevated and user is available
+    if user_id and result.get("risk_score", 0) >= 30:
         active_chain = db.query(AttackChain).filter(
             AttackChain.user_id == user_id,
             AttackChain.status == "ACTIVE"
@@ -62,31 +62,33 @@ def save_security_event_if_threat(
 @router.post("/message", response_model=AnalysisResultResponse)
 def analyze_message(
     req: MessageAnalysisRequest,
-    current_user: User = Depends(get_current_user),
+    current_user: Optional[User] = Depends(get_optional_current_user),
     db: Session = Depends(get_db)
 ):
     """Analyze SMS / Hinglish / Hindi messages for banking, KYC, and urgency threats."""
     result = nlp_detector.analyze(req.text)
-    event_id = save_security_event_if_threat(db, current_user.id, result)
+    user_id = current_user.id if current_user else None
+    event_id = save_security_event_if_threat(db, user_id, result)
     result["saved_event_id"] = event_id
     return result
 
 @router.post("/url", response_model=AnalysisResultResponse)
 def analyze_url(
     req: URLAnalysisRequest,
-    current_user: User = Depends(get_current_user),
+    current_user: Optional[User] = Depends(get_optional_current_user),
     db: Session = Depends(get_db)
 ):
     """Analyze Pay-Safe URLs for banking lookalikes, typosquatting, and homograph threats."""
     result = url_detector.analyze(req.url)
-    event_id = save_security_event_if_threat(db, current_user.id, result)
+    user_id = current_user.id if current_user else None
+    event_id = save_security_event_if_threat(db, user_id, result)
     result["saved_event_id"] = event_id
     return result
 
 @router.post("/social-share", response_model=AnalysisResultResponse)
 def analyze_social_share(
     req: SocialShareRequest,
-    current_user: User = Depends(get_current_user),
+    current_user: Optional[User] = Depends(get_optional_current_user),
     db: Session = Depends(get_db)
 ):
     """Share-to-CYBERGUARD ingestion for WhatsApp, Instagram, and Telegram content."""
@@ -109,19 +111,21 @@ def analyze_social_share(
         result["source"] = f"{req.platform} Shared Message"
         result["indicators"].extend([f"SHARED_VIA_{req.platform.upper()}_FORWARD"])
 
-    event_id = save_security_event_if_threat(db, current_user.id, result, is_simulated=True)
+    user_id = current_user.id if current_user else None
+    event_id = save_security_event_if_threat(db, user_id, result, is_simulated=True)
     result["saved_event_id"] = event_id
     return result
 
 @router.post("/call", response_model=AnalysisResultResponse)
 def analyze_call(
     req: CallAnalysisRequest,
-    current_user: User = Depends(get_current_user),
+    current_user: Optional[User] = Depends(get_optional_current_user),
     db: Session = Depends(get_db)
 ):
     """Call Guard transcript analyzer for OTP pressure and official impersonation."""
     result = call_analyzer.analyze_transcript(req.transcript)
-    event_id = save_security_event_if_threat(db, current_user.id, result, is_simulated=True)
+    user_id = current_user.id if current_user else None
+    event_id = save_security_event_if_threat(db, user_id, result, is_simulated=True)
     result["saved_event_id"] = event_id
     return result
 

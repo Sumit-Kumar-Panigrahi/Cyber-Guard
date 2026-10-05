@@ -179,7 +179,7 @@ export const MobilePhoneFrame: React.FC<MobilePhoneFrameProps> = ({ onEventCreat
 
         {/* Privacy & Labelling Disclaimer */}
         <div className="rounded-xl border border-slate-800 bg-slate-950/60 p-3.5 text-[11px] text-slate-400 leading-relaxed">
-          <span className="font-semibold text-slate-300">Hackathon Engineering Note:</span> Mobile screen UI is an interactive sandbox environment simulating an Indian citizen’s smartphone. All threat extraction and NLP risk evaluations hit real backend FastAPI services.
+          <span className="font-semibold text-slate-300">Security Sandbox Architecture:</span> Mobile screen UI is an interactive sandbox environment simulating an Indian citizen’s smartphone. All threat extraction and NLP risk evaluations hit real backend FastAPI services.
         </div>
       </div>
 

@@ -7,7 +7,7 @@ class Settings:
     API_V1_STR: str = "/api/v1"
     
     # Security
-    SECRET_KEY: str = os.getenv("SECRET_KEY", "cyberguard-secret-super-secure-key-2026-hackathon-token")
+    SECRET_KEY: str = os.getenv("SECRET_KEY", "cyberguard-secret-super-secure-key-2026-production-enterprise-token")
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60 * 24  # 24 hours
     
